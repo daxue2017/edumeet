@@ -192,6 +192,7 @@ class Democratic extends React.PureComponent
 							id={peer}
 							spacing={6}
 							style={style}
+							videoLevel={1}
 						/>
 					);
 				})}

@@ -276,6 +276,7 @@ class Filmstrip extends React.PureComponent
 							advancedMode={advancedMode}
 							id={activePeerId}
 							style={speakerStyle}
+							videoLevel={2}
 						/>
 					}
 				</div>
@@ -316,6 +317,7 @@ class Filmstrip extends React.PureComponent
 												advancedMode={advancedMode}
 												id={peerId}
 												style={peerStyle}
+												videoLevel={peerId === activePeerId ? 2 : 0}
 												smallContainer
 											/>
 										</div>

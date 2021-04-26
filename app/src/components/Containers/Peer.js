@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { makePeerConsumerSelector } from '../Selectors';
 import PropTypes from 'prop-types';
@@ -18,6 +18,9 @@ import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import NewWindowIcon from '@material-ui/icons/OpenInNew';
 import FullScreenIcon from '@material-ui/icons/Fullscreen';
 import Volume from './Volume';
+import Logger from '../../Logger';
+
+const logger = new Logger();
 
 const styles = (theme) =>
 	({
@@ -143,6 +146,7 @@ const Peer = (props) =>
 		toggleConsumerFullscreen,
 		toggleConsumerWindow,
 		spacing,
+		videoLevel,
 		style,
 		smallContainer,
 		windowConsumer,
@@ -175,6 +179,26 @@ const Peer = (props) =>
 		'margin' : spacing,
 		...style
 	};
+
+	const [ hasVideo, setHasVideo ] = useState(false);
+
+	if (hasVideo != videoVisible)
+	{
+		setHasVideo(videoVisible);
+	}
+
+	useEffect(() =>
+	{
+		logger.debug('--------------------------peer---22222222222"%s"', videoLevel);
+		if (hasVideo && [ 0, 1, 2 ].includes(videoLevel))
+		{
+			roomClient.setConsumerPreferredLayers(webcamConsumer.id, videoLevel, 0);
+			logger.debug('SpeakerPeer [%s] component.setConsumerPreferedLayers %s', peer.id, videoLevel);
+			logger.debug('%o', roomClient);
+		}
+
+		return;
+	}, [ hasVideo, videoLevel, roomClient ]);
 
 	return (
 		<React.Fragment>
@@ -779,6 +803,7 @@ Peer.propTypes =
 	activeSpeaker            : PropTypes.bool,
 	browser                  : PropTypes.object.isRequired,
 	spacing                  : PropTypes.number,
+	videoLevel               : PropTypes.number,
 	style                    : PropTypes.object,
 	smallContainer           : PropTypes.bool,
 	toggleConsumerFullscreen : PropTypes.func.isRequired,

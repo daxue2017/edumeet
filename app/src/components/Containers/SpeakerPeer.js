@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { withRoomContext } from '../../RoomContext';
 import { makePeerConsumerSelector } from '../Selectors';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import * as roomActions from '../../actions/roomActions';
 import * as appPropTypes from '../appPropTypes';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import VideoView from '../VideoContainers/VideoView';
 import Volume from './Volume';
+import Logger from '../../Logger';
+
+const logger = new Logger();
 
 const styles = (theme) =>
 	({
@@ -69,12 +74,15 @@ const styles = (theme) =>
 const SpeakerPeer = (props) =>
 {
 	const {
+		id,
+		roomClient,
 		advancedMode,
 		peer,
 		micConsumer,
 		webcamConsumer,
 		screenConsumer,
 		spacing,
+		videoLevel,
 		style,
 		classes
 	} = props;
@@ -95,6 +103,25 @@ const SpeakerPeer = (props) =>
 	{
 		'margin' : spacing
 	};
+
+	const [ hasVideo, setHasVideo ] = useState(false);
+
+	if (hasVideo != videoVisible)
+	{
+		setHasVideo(videoVisible);
+	}
+
+	useEffect(() =>
+	{
+		logger.debug('11----------------------------------speakerpeer-----111111111"%s"]', videoLevel);
+
+		if (hasVideo && [ 0, 1, 2 ].includes(videoLevel))
+		{
+			roomClient.setConsumerPreferredLayers(webcamConsumer.id, videoLevel, 0);
+			logger.debug('SpeakerPeer [%s] component.setConsumerPreferedLayers %s', peer.id, videoLevel);
+			logger.debug('%o', roomClient);
+		}
+	}, [ hasVideo, videoLevel, id ]);
 
 	return (
 		<React.Fragment>
@@ -205,12 +232,15 @@ const SpeakerPeer = (props) =>
 
 SpeakerPeer.propTypes =
 {
+	id             : PropTypes.string,
+	roomClient     : PropTypes.any.isRequired,
 	advancedMode   : PropTypes.bool,
 	peer           : appPropTypes.Peer,
 	micConsumer    : appPropTypes.Consumer,
 	webcamConsumer : appPropTypes.Consumer,
 	screenConsumer : appPropTypes.Consumer,
 	spacing        : PropTypes.number,
+	videoLevel     : PropTypes.number,
 	style          : PropTypes.object,
 	classes        : PropTypes.object.isRequired
 };
@@ -225,7 +255,7 @@ const mapStateToProps = (state, { id }) =>
 	};
 };
 
-export default connect(
+export default withRoomContext(connect(
 	mapStateToProps,
 	null,
 	null,
@@ -239,4 +269,4 @@ export default connect(
 			);
 		}
 	}
-)(withStyles(styles, { withTheme: true })(SpeakerPeer));
+)(withStyles(styles, { withTheme: true })(SpeakerPeer)));
